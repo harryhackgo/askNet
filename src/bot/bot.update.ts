@@ -28,11 +28,6 @@ export class BotUpdate {
     this.botService.onContact(ctx);
   }
 
-  @On("message")
-  async onMessage(@Ctx() ctx: Context) {
-    await this.botService.deleteUncaughtMessage(ctx);
-  }
-
   @Action(/^approve_\d+$/)
   async onClickLocation(@Ctx() ctx: Context) {
     await this.botService.onClickApprove(ctx);
@@ -41,5 +36,10 @@ export class BotUpdate {
   @Action(/^cancel_\d+$/)
   async onDelLocation(@Ctx() ctx: Context) {
     await this.botService.onClickCancel(ctx);
+  }
+
+  @On("message")
+  async onMessage(@Ctx() ctx: Context) {
+    await this.botService.deleteUncaughtMessage(ctx);
   }
 }

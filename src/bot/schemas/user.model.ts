@@ -17,19 +17,19 @@ export class User {
   @Prop({ trim: true })
   last_name: string;
 
-  @Prop({ trim: true })
+  @Prop({ trim: true, default: null })
   real_name: string; //
 
-  @Prop({ enum: ["male", "female"], trim: true })
+  @Prop({ enum: ["male", "female"], trim: true, default: null })
   gender: string; //
 
-  @Prop()
+  @Prop({ default: null })
   birth_year: number; //
 
-  @Prop({ trim: true })
+  @Prop({ trim: true, default: null })
   phone_number: string; //
 
-  @Prop({ unique: true, trim: true })
+  @Prop({ unique: true, trim: true, default: null })
   email: string; //
 
   @Prop({ default: false })

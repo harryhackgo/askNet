@@ -17,19 +17,13 @@ export class BotService {
     const user_id = ctx.from!.id;
     const user = await this.userModel.findOne({ user_id });
     if (user && user?.last_state != "finish") {
-      await this.userModel.deleteOne({ user_id: user.user_id });
-      await this.userModel.create({
-        user_id,
-        username: ctx.from?.username,
-        first_name: ctx.from?.first_name,
-        last_name: ctx.from?.last_name,
-        user_lang: ctx.from?.language_code,
-        last_state: "real_name",
-      });
-      await ctx.reply(`Hi! What is your name?`, {
-        parse_mode: "HTML",
-        ...Markup.removeKeyboard(),
-      });
+      await ctx.reply(
+        `Hi again! Please, to finish your registration enter your ${user.last_state}`,
+        {
+          parse_mode: "HTML",
+          ...Markup.removeKeyboard(),
+        }
+      );
     } else if (!user) {
       await this.userModel.create({
         user_id,
@@ -37,7 +31,7 @@ export class BotService {
         first_name: ctx.from?.first_name,
         last_name: ctx.from?.last_name,
         user_lang: ctx.from?.language_code,
-        last_state: "real_name",
+        last_state: "real name",
       });
       await ctx.reply(`Hi! What is your name?`, {
         parse_mode: "HTML",
@@ -56,10 +50,10 @@ export class BotService {
     if ("contact" in ctx.message!) {
       const user_id = ctx.from!.id;
       const user = await this.userModel.findOne({ user_id });
-
-      if (user) {
+      if (user?.last_state == "phone number") {
         user.phone_number = ctx.message.contact.phone_number;
         user.last_state = "email";
+
         await user.save();
         await ctx.reply(`Thank you! Now, what is your email address?`, {
           parse_mode: "HTML",
@@ -95,29 +89,23 @@ export class BotService {
         const user_id = ctx.from!.id;
         const user = await this.userModel.findOne({ user_id });
         if (user && user.last_state != "finish") {
-          if (user.last_state == "real_name") {
+          if (user.last_state == "real name") {
             user.real_name = ctx.message.text;
-            user.last_state = "number";
+            user.last_state = "gender";
             await user.save();
-            await ctx.reply("Please share your contact", {
-              ...Markup.keyboard([
-                [Markup.button.contactRequest("Share my contact 📞")],
-              ])
-                .resize()
-                .oneTime(),
-            });
+            await ctx.reply("What is your gender (male/female)");
           } else if (user.last_state == "gender") {
             if (!["male", "female"].includes(ctx.message.text.toLowerCase()))
               return await ctx.reply("To'g'ri yo'lga qayting brodar", {
                 ...Markup.removeKeyboard(),
               });
             user.gender = ctx.message.text;
-            user.last_state = "birth_year";
+            user.last_state = "birth year";
             await user.save();
             await ctx.reply("Now, enter your birth year please", {
               ...Markup.removeKeyboard(),
             });
-          } else if (user.last_state == "birth_year") {
+          } else if (user.last_state == "birth year") {
             try {
               const birth_year = parseInt(ctx.message.text);
               if (
@@ -130,7 +118,7 @@ export class BotService {
                 );
               }
               user.birth_year = birth_year;
-              user.last_state = "phone_number";
+              user.last_state = "phone number";
               await user.save();
               await ctx.reply("Please share your contact", {
                 ...Markup.keyboard([
@@ -156,36 +144,40 @@ export class BotService {
             user.email = ctx.message.text;
             user.last_state = "finish";
             await user.save();
-            await ctx.reply("Please, send the location of your workplace", {
-              ...Markup.removeKeyboard(),
-            });
-          }
+            await ctx.reply(
+              "Congratulations! Now you will be notified if we have any questions for you :D",
+              {
+                ...Markup.removeKeyboard(),
+              }
+            );
 
-          await ctx.replyWithHTML(`Success! Check your information`);
-          await ctx.replyWithHTML(
-            `<b>Name</b>: ${user.real_name}
-<b>Gender</b>: ${user.gender}
-<b>Birth year</b>: ${user.birth_year}
-<b>Phone number</b>: ${user.phone_number}
-<b>Email</b>: ${user.email}
-`,
-            {
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: "Approve",
-                      callback_data: `approve_${user.user_id}`,
-                    },
-                    {
-                      text: "Cancel",
-                      callback_data: `cancel_${user.user_id}`,
-                    },
+            await ctx.replyWithHTML(`Success! Check your information`);
+            await ctx.replyWithHTML(
+              `
+              <b>Name</b>: ${user.real_name}
+              <b>Gender</b>: ${user.gender}
+              <b>Birth year</b>: ${user.birth_year}
+              <b>Phone number</b>: ${user.phone_number}
+              <b>Email</b>: ${user.email}
+              `,
+              {
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: "Approve",
+                        callback_data: `approve_${user.user_id}`,
+                      },
+                      {
+                        text: "Cancel",
+                        callback_data: `cancel_${user.user_id}`,
+                      },
+                    ],
                   ],
-                ],
-              },
-            }
-          );
+                },
+              }
+            );
+          }
         }
       }
     } catch (error) {
@@ -217,7 +209,7 @@ export class BotService {
       const contextAction = ctx.callbackQuery!["data"];
       const user_id = contextAction.split("_")[1];
 
-      const master = await this.userModel.findOneAndDelete({ user_id });
+      await this.userModel.findOneAndDelete({ user_id });
 
       await ctx.editMessageText("Your information has been deleted");
       await ctx.reply(`If you want to register again press the button below.`, {

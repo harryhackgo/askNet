@@ -8,6 +8,14 @@ import { AuthModule } from "./auth/auth.module";
 import { TelegrafModule } from "nestjs-telegraf";
 import { BOT_NAME } from "./app.constants";
 import { BotModule } from "./bot/bot.module";
+import { SurveyStatusModule } from './survey_status/survey_status.module';
+import { PaymentsModule } from './payments/payments.module';
+import { ResponsesModule } from './responses/responses.module';
+import { QuestionsModule } from './questions/questions.module';
+import { AnswerOptionsModule } from './answer_options/answer_options.module';
+import { SurveysModule } from './surveys/surveys.module';
+import { StatysticsModule } from './statystics/statystics.module';
+import { ClientsModule } from './clients/clients.module';
 
 @Module({
   imports: [
@@ -25,6 +33,14 @@ import { BotModule } from "./bot/bot.module";
     BotModule,
     AdminModule,
     AuthModule,
+    SurveyStatusModule,
+    PaymentsModule,
+    ResponsesModule,
+    QuestionsModule,
+    AnswerOptionsModule,
+    SurveysModule,
+    StatysticsModule,
+    ClientsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
